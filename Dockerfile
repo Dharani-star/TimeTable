@@ -1,11 +1,27 @@
-# Use an official Flutter image
-FROM cirrusci/flutter:stable
+# Use a base image with minimal dependencies
+FROM debian:stable-slim
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy the Flutter project files into the container
+# Install required dependencies
+RUN apt-get update && apt-get install -y curl unzip xz-utils git && \
+    rm -rf /var/lib/apt/lists/*
+
+# Download and install Flutter (latest stable)
+RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.8.0-stable.tar.xz | tar -xJ
+
+# Set Flutter path
+ENV PATH="/app/flutter/bin:$PATH"
+
+# Verify Flutter installation
+RUN flutter --version
+
+# Copy project files
 COPY . .
+
+# Enable Flutter web
+RUN flutter config --enable-web
 
 # Get dependencies
 RUN flutter pub get
@@ -13,8 +29,8 @@ RUN flutter pub get
 # Build the Flutter web app
 RUN flutter build web
 
-# Expose the port for the web server
+# Expose the web server port
 EXPOSE 8080
 
-# Start a simple HTTP server to serve the web app
+# Start a simple HTTP server
 CMD ["python3", "-m", "http.server", "-d", "/app/build/web", "8080"]
