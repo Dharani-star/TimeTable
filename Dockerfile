@@ -1,36 +1,42 @@
-# Use a lightweight Debian-based image
-FROM debian:stable-slim
+# Use a base image with Debian/Ubuntu for compatibility
+FROM debian:latest
 
-# Set working directory
-WORKDIR /app
+# Set environment variables
+ENV FLUTTER_VERSION=3.7.0  # Use a stable version
+ENV FLUTTER_HOME=/flutter
 
-# Install dependencies
-RUN apt-get update && apt-get install -y curl unzip xz-utils git && \
+# Install required dependencies
+RUN apt update && apt install -y \
+    git curl unzip xz-utils zip libglu1-mesa && \
     rm -rf /var/lib/apt/lists/*
 
-# Clone Flutter repository
-RUN git clone https://github.com/flutter/flutter.git -b stable /app/flutter
+# Download and install Flutter
+RUN git clone https://github.com/flutter/flutter.git -b stable $FLUTTER_HOME
 
 # Set Flutter path
-ENV PATH="/app/flutter/bin:$PATH"
+ENV PATH="$FLUTTER_HOME/bin:$PATH"
 
 # Verify Flutter installation
 RUN flutter --version
 
-# Copy project files
-COPY . .
-
 # Enable Flutter web
 RUN flutter config --enable-web
 
-# Get dependencies
+# Create a directory for the app
+WORKDIR /app
+
+# Copy pubspec and get dependencies first (to leverage Docker cache)
+COPY pubspec.yaml pubspec.lock ./
 RUN flutter pub get
+
+# Copy the rest of the app
+COPY . .
 
 # Build the Flutter web app
 RUN flutter build web
 
-# Expose the web server port
+# Expose the port for serving the web app
 EXPOSE 8080
 
-# Start a simple HTTP server
-CMD ["python3", "-m", "http.server", "-d", "/app/build/web", "8080"]
+# Use a lightweight HTTP server to serve the app
+CMD ["sh", "-c", "cd build/web && python3 -m http.server 8080"]
