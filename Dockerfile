@@ -1,15 +1,15 @@
-# Use a base image with minimal dependencies
+# Use a lightweight Debian-based image
 FROM debian:stable-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install required dependencies
+# Install dependencies
 RUN apt-get update && apt-get install -y curl unzip xz-utils git && \
     rm -rf /var/lib/apt/lists/*
 
-# Download and install Flutter (latest stable)
-RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.8.0-stable.tar.xz | tar -xJ
+# Download and install the latest stable Flutter version
+RUN curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux.tar.xz | tar -xJ
 
 # Set Flutter path
 ENV PATH="/app/flutter/bin:$PATH"
