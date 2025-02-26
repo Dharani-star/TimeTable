@@ -8,11 +8,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl unzip xz-utils git && \
     rm -rf /var/lib/apt/lists/*
 
-# Download and install the latest stable Flutter version from GitHub
-RUN curl -fsSL https://github.com/flutter/flutter/archive/refs/heads/stable.tar.gz | tar -xz -C /app
+# Clone Flutter repository
+RUN git clone https://github.com/flutter/flutter.git -b stable /app/flutter
 
 # Set Flutter path
-ENV PATH="/app/flutter-stable/bin:$PATH"
+ENV PATH="/app/flutter/bin:$PATH"
 
 # Verify Flutter installation
 RUN flutter --version
