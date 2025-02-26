@@ -2,7 +2,7 @@
 FROM debian:latest
 
 # Set environment variables
-ENV FLUTTER_VERSION=3.7.0  # Use a stable version
+ENV FLUTTER_VERSION=3.7.0  
 ENV FLUTTER_HOME=/flutter
 
 # Install required dependencies
